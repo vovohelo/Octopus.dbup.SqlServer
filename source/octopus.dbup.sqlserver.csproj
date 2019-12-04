@@ -6,6 +6,7 @@
         <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
         <Title>octopus.dbup.sqlserver</Title>
         <Authors>Octopus Deploy</Authors>
+        <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
     </PropertyGroup>
 
     <ItemGroup>
