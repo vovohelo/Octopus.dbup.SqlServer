@@ -41,6 +41,7 @@ Task("Clean")
 
 Task("Build")
     .IsDependentOn("Clean")
+    .IsDependentOn("GetVersion")
     .Does(() =>
     {
         DotNetCoreBuild("./source", new DotNetCoreBuildSettings
