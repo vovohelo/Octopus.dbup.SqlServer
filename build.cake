@@ -57,7 +57,7 @@ Task("PushPackage")
     .Does(() =>
     {
         NuGetPush($"./source/bin/{configuration}/octopus.dbup.sqlserver.{nugetVersion}.nupkg", new NuGetPushSettings {
-            Source = "https://packages.octopushq.com/dependencies/nuget/index.json",
+            Source = "https://f.feedz.io/octopus-deploy/dependencies/nuget/index.json",
             ApiKey = EnvironmentVariable("FeedzIoApiKey")
         });
     });
