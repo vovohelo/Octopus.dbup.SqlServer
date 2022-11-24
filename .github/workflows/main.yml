@@ -8,13 +8,13 @@ on:
       - main
 
   pull_request:
-    types: [ opened, synchronize, reopened ]
+    types: [opened, synchronize, reopened]
 
   schedule:
     # Daily 5am australian/brisbane time
-    - cron: '0 19 * * *'
+    - cron: "0 19 * * *"
 
-jobs: 
+jobs:
   build:
     runs-on: ubuntu-latest
     env:
@@ -23,15 +23,18 @@ jobs:
     steps:
       - name: Add nightly suffix if nightly
         if: github.event_name == 'schedule'
-        run: echo "::set-env name=VERSION::${{ env.VERSION }}-nightly"
-      
+        run: |
+          version="${{ env.VERSION }}-nightly"
+          echo "Current Version: ${version}"
+          echo "::set-env name=VERSION::${version}"
+
       - name: Add branch suffix if branch
         if: github.event_name == 'pull_request'
         run: |
           version=$(echo ${{ env.VERSION }}-${{ github.head_ref || github.ref }} | tr "/" "-")
           echo "Current Version: ${version}"
           echo "::set-env name=VERSION::$version"
-          
+
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0 # all
@@ -42,7 +45,7 @@ jobs:
       # GeneratePackageOnBuild is specified in the csproj, so this will produce a nupkg
       - name: Pack
         run: dotnet publish -c Release /p:Version=${{ env.VERSION }} ./source
-        
+
       - name: Install Octopus CLI 🐙
         uses: OctopusDeploy/install-octopus-cli-action@v1
         with:
