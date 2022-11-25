@@ -58,3 +58,12 @@ jobs:
           space: Core Platform
           api_key: ${{ secrets.DEPLOY_API_KEY }}
           packages: ./source/bin/Release/octopus.dbup.sqlserver.${{ env.VERSION }}.nupkg
+
+      - name: Create a release in Octopus Deploy 🐙
+        uses: OctopusDeploy/create-release-action@v2
+        env:
+          OCTOPUS_API_KEY: ${{ secrets.DEPLOY_API_KEY  }}
+          OCTOPUS_HOST: ${{ secrets.DEPLOY_URL }}
+          OCTOPUS_SPACE: "Core Platform"
+        with:
+          project: "Octopus.Dbup.SqlServer"
