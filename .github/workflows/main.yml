@@ -1,0 +1,69 @@
+name: Package and Push
+
+on:
+  # Triggers the workflow on pull request events and merges/pushes to main
+  push:
+    branches:
+      - master
+      - main
+
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+  schedule:
+    # Daily 5am australian/brisbane time
+    - cron: "0 19 * * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      ACTIONS_ALLOW_UNSECURE_COMMANDS: true # to allow setting version env var
+      VERSION: "1.1.${{ github.run_number }}"
+    steps:
+      - name: Add nightly suffix if nightly
+        if: github.event_name == 'schedule'
+        run: |
+          version="${{ env.VERSION }}-nightly"
+          echo "Current Version: ${version}"
+          echo "::set-env name=VERSION::${version}"
+
+      - name: Add branch suffix if branch
+        if: github.event_name == 'pull_request'
+        run: |
+          version=$(echo ${{ env.VERSION }}-${{ github.head_ref || github.ref }} | tr "/" "-")
+          echo "Current Version: ${version}"
+          echo "::set-env name=VERSION::$version"
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # all
+      - uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+
+      # GeneratePackageOnBuild is specified in the csproj, so this will produce a nupkg
+      - name: Pack
+        run: dotnet publish -c Release /p:Version=${{ env.VERSION }} ./source
+
+      - name: Install Octopus CLI 🐙
+        uses: OctopusDeploy/install-octopus-cli-action@v1
+        with:
+          version: latest
+
+      - name: Push to Octopus 🐙
+        uses: OctopusDeploy/push-package-action@v1
+        with:
+          server: ${{ secrets.DEPLOY_URL }}
+          space: Core Platform
+          api_key: ${{ secrets.DEPLOY_API_KEY }}
+          packages: ./source/bin/Release/octopus.dbup.sqlserver.${{ env.VERSION }}.nupkg
+
+      - name: Create a release in Octopus Deploy 🐙
+        uses: OctopusDeploy/create-release-action@v2
+        env:
+          OCTOPUS_API_KEY: ${{ secrets.DEPLOY_API_KEY  }}
+          OCTOPUS_HOST: ${{ secrets.DEPLOY_URL }}
+          OCTOPUS_SPACE: "Core Platform"
+        with:
+          project: "Octopus.Dbup.SqlServer"
