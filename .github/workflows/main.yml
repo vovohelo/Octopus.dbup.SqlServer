@@ -71,4 +71,4 @@ jobs:
         with:
           project: "Octopus.Dbup.SqlServer"
           packages: |
-            "octopus.dbup.sqlserver": ${{ env.VERSION }}
+            octopus.dbup.sqlserver: ${{ env.VERSION }}
