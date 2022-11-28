@@ -70,3 +70,5 @@ jobs:
           OCTOPUS_SPACE: "Core Platform"
         with:
           project: "Octopus.Dbup.SqlServer"
+          packages: |
+            "octopus.dbup.sqlserver": ${{ env.VERSION }}
